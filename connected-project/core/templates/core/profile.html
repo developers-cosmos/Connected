@@ -1,0 +1,206 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - {{user.username}}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <style>
+        .profile-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        .profile-stat {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .profile-stat-label {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .post-options {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ellipsis-container {
+            position: relative;
+        }
+
+        .ellipsis-container svg {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .ellipsis-options {
+            position: absolute;
+            top: 24px;
+            right: 0;
+            width: 100px;
+            background-color: white;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .ellipsis-options a {
+            display: block;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .ellipsis-options a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .ellipsis-container:hover .ellipsis-options {
+            display: block;
+        }
+      </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'explore' %}">
+            <img src="{% static 'logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="Logo">
+        </a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <form class="form-inline my-2 my-lg-0" method="POST" action="{% url 'search' %}">
+                    {% csrf_token %}
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="username">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </ul>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img src="{{ user_profile.image.url }}" width="30" height="30" class="profile-img" alt="Logo" style="border-radius:50%;">
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'profile' user.username %}">Profile</a>
+                    <a class="dropdown-item" href="{% url 'explore' %}">News Feed</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <img src="{{user_profile.image.url}}" class="card-img-top" style="height: 250px; width: 100%;" alt="Profile Picture">
+                <h3 style="margin-bottom: 0.9rem;"><b>@{{ user.username }}</b></h3>
+                {% if user_profile.location %}
+                    <p>📍 {{ profile.location }}</p>
+                {% endif %}
+                <p>{{ user_profile.bio }}</p>
+                {% if user_object.username == user.username %}
+                    <a href="{% url 'edit_profile' %}" class="btn btn-secondary edit-profile">Edit Profile</a>
+                {% else %}
+                    <form method="POST" action="{% url 'follow' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="follower" value="{{ user.username }}">
+                        <input type="hidden" name="user" value="{{user_object.username}}" />
+                        <button class="btn btn-primary follow-button">{{ follow_button_text }}</button>
+                    </form>
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <div class="profile-header" style="background-image: url({% static 'bg.jpg' %});background-size: cover;background-repeat: no-repeat;background-attachment: fixed;background-position: center;height:420px;">
+                    <div class="profile-name">{{ user.name }}</div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        {{ user_post_length }}
+                        <div class="profile-stat-label">
+                            {% if user_post_length == 0 %}
+                                No Post
+                            {% elif user_post_length == 1 %}
+                                Post
+                            {% else %}
+                                Posts
+                            {% endif %}
+                        </div>
+                      </div>
+                    <div class="profile-stat">
+                      {{ user_followers }}
+                      <div class="profile-stat-label">Followers</div>
+                    </div>
+                    <div class="profile-stat">
+                      {{ user_following }}
+                      <div class="profile-stat-label">Following</div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="row posts">
+                    {% for post in posts %}
+                    <div class="col-md-4">
+                        <hr>
+                        <p>
+                            <strong>@{{ post.user }}</strong>
+                            {% comment %} <a href="/profile/{{post.user}}"><strong>@{{post.user}}</strong></a> {% endcomment %}
+                        </p>
+                        <a href="{{ post.image.url }}">
+                            <img src="{{ post.image.url }}" class="img-fluid" style="height:250px;">
+                        </a>
+                        {% comment %} <button class="btn btn-danger delete-button">Delete</button> {% endcomment %}
+                        <hr>{{ post.caption }}
+
+                        <div class="post-options">
+                            <div class="ellipsis-container">
+                              <svg viewBox="0 0 24 24">
+                                <circle cx="9" cy="9" r="2" fill="black"></circle>
+                                <circle cx="15" cy="9" r="2" fill="black"></circle>
+                                <circle cx="21" cy="9" r="2" fill="black"></circle>
+                              </svg>
+                              <div class="ellipsis-options">
+                                {% if user_object.username == user.username %}
+                                    <a href="{% url 'delete_post' post.id %}">Delete</a>
+                                {% endif %}
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+      var followButton = document.getElementById("follow-button");
+
+      // Add functionality to follow button
+      followButton.addEventListener("click", function() {
+        if (followButton.innerHTML === "Follow") {
+          followButton.innerHTML = "Following";
+        } else {
+          followButton.innerHTML = "Follow";
+        }
+      });
+        /* Add custom JavaScript here */
+        $('.dropdown-toggle').dropdown()
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+.card {
+    margin-top: 20px;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-title {
+    font-weight: bold;
+}
+
+.card-text {
+    line-height: 1.5;
+}
+
+.text-muted {
+    font-size: 0.8em;
+}
+
+.img-fluid {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-footer {
+    padding: 0;
+}
+
+.card-footer h6 {
+    font-size: 0.8em;
+    margin: 0;
+}
+
+#edit-profile-form {
+    margin: 50px auto;
+    max-width: 600px;
+}
+
+#edit-profile-form .form-group {
+    margin-bottom: 20px;
+}
+
+#edit-profile-form label {
+    font-weight: 600;
+    font-size: 1.1em;
+    margin-bottom: 5px;
+}
+
+#edit-profile-form input[type=text], #edit-profile-form textarea {
+    border-radius: 0;
+    box-shadow: none;
+    border-color: #ddd;
+    padding: 10px;
+    font-size: 1.1em;
+}
+
+#edit-profile-form input[type=text]:focus, #edit-profile-form textarea:focus {
+    border-color: #4cb1f5;
+    box-shadow: 0 0 0 0.2rem rgba(76, 177, 245, 0.25);
+}
+
+#edit-profile-form button[type=submit] {
+    background-color: #4cb1f5;
+    border-color: #4cb1f5;
+    padding: 10px 20px;
+}
+
+#edit-profile-form button[type=submit]:hover {
+    background-color: #3e9cc5;
+    border-color: #3e9cc5;
+    cursor: pointer;
+}
+
+.messages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.messages li {
+    padding: 10px;
+    margin-bottom: 10px;
+    color: white;
+    border-radius: 5px;
+}
+
+.messages .success {
+    background-color: green;
+}
+
+.messages .error {
+    background-color: red;
+}
+
+.messages .info {
+    background-color: blue;
+}
