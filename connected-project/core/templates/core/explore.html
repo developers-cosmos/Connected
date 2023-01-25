@@ -1,0 +1,216 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Explore - {{user.username}}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'css/explore.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'explore' %}">
+            <img src="{% static 'logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+              <form class="form-inline my-2 my-lg-0" method="POST" action="{% url 'search' %}">
+                {% csrf_token %}
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="username">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+              </form>
+            </ul>
+            <div class="dropdown">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="uploadDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Upload Pics
+              </button>
+              <div class="dropdown-menu" aria-labelledby="uploadDropdown">
+                  <div class="bg-gray-100 border-2 border-dashed flex flex-col h-24 items-center justify-center relative w-full rounded-lg  ">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-12">
+                          <path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z" />
+                          <path d="M9 13h2v5a1 1 0 11-2 0v-5z" />
+                      </svg>
+                  </div>
+                  <form action="/upload" method="POST" enctype="multipart/form-data" >
+                      {% csrf_token %}
+                      <div class="form-group">
+                          <div class="custom-file">
+                              <input type="file" class="custom-file-input" id="uploadFile" name="image_upload" required="True">
+                              <label class="custom-file-label" for="uploadFile">Choose file</label>
+                          </div>
+                      </div>
+                      <textarea class="button soft-warning small" name="caption" placeholder="caption..." style=" min-width:200px; max-width:100%;min-height:50px;height:100%;width:100%;" ></textarea>
+                      <br>
+                      <button type="submit" class="btn btn-primary">Upload</button>
+                  </form>
+              </div>
+          </div>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img src="{{ user_profile.image.url }}" width="30" height="30" class="profile-img" alt="Logo" style="border-radius:50%;">
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'profile' user.username %}">Profile</a>
+                    <a class="dropdown-item" href="{% url 'explore' %}">News Feed</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <div class="row">
+          <div class="col-md-8" id="news-feed">
+            <div class="post" *ngFor="let post of posts">
+              <div class="post-header">
+
+                {% if not posts %}
+                  <div style="text-align:center;font-weight: bold;">
+                    <h1> No Feed</h1>
+                    <hr>
+                    <p>Follow other users to see their feed</p>
+                  </div>
+                {% endif %}
+
+                {% for post in posts reversed %}
+                <div class="post-container">
+                  <div class="post-content">
+                    {% comment %} <a href="/profile/{{post.user}}">
+                      <strong>
+                        @{{ post.user }}
+                      </strong>
+                    </a> {% endcomment %}
+                    <strong>
+                      <a href="{% url 'profile' post.user %}">
+                        @{{ post.user }}
+                      </a>
+                    </strong>
+                    <hr>
+                    <a href="{{ post.image.url }}">
+                      <img src="{{ post.image.url }}" class="post-image">
+                    </a>
+                    <br><br>
+                    <div class="post-caption">
+                      <form action="/like_post?post_id={{post.id}}" method="post">
+                        {% csrf_token %}
+
+                        {% comment %} {% if post.likes == 0 %}
+                          <button class="like-button" onclick="toggleLike({{ post.id }})">
+                            <svg class="like-icon like-svg" viewBox="0 0 24 24">
+                              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
+                            </svg>
+                          </button>
+                        {% else %}
+                          <button class="like-button liked" onclick="toggleLike({{ post.id }})">
+                            <svg class="like-icon like-svg" viewBox="0 0 24 24">
+                              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
+                            </svg>
+                          </button>
+                        {% endif %} {% endcomment %}
+
+                        {% if post.likes != 0 and post.id in liked_posts_ids %}
+                          <button class="like-button liked" onclick="toggleLike({{ post.id }})">
+                            <svg class="like-icon like-svg" viewBox="0 0 24 24">
+                              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
+                            </svg>
+                          </button>
+                        {% else %}
+                          <button class="like-button" onclick="toggleLike({{ post.id }})">
+                            <svg class="like-icon like-svg" viewBox="0 0 24 24">
+                              <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z"></path>
+                            </svg>
+                          </button>
+                        {% endif %}
+
+
+                        {% if post.likes == 0 %}
+                          <span class="like-count">No likes</span>
+                        {% elif post.likes == 1 %}
+                          <span class="like-count">Liked by {{ post.likes }} person</span>
+                        {% else %}
+                          <span class="like-count">Liked by {{ post.likes }} people</span>
+                        {% endif %}
+                      </form>
+                      <hr>
+                      <p>{{ post.caption }}</p>
+                    </div>
+                  </div>
+                  <div class="post-options">
+                    <div class="ellipsis-container">
+                      <svg viewBox="0 0 24 24">
+                        <circle cx="9" cy="9" r="2" fill="black"></circle>
+                        <circle cx="15" cy="9" r="2" fill="black"></circle>
+                        <circle cx="21" cy="9" r="2" fill="black"></circle>
+                      </svg>
+                      <div class="ellipsis-options">
+                        <a href="#">Share</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4" id="suggestions-box">
+            <h4>Suggestions</h4>
+            {% for suggested_user in suggestions_username_profile_list %}
+            <hr>
+              <div class="suggestions-list">
+                <div class="suggestion" *ngFor="let user of suggestions">
+                  <a href="{% url 'profile' suggested_user.user.username %}">
+                    <img src="{{ suggested_user.image.url }}" alt="{{ suggested_user.user.username }}" class="suggestion-picture">
+                  </a>
+                  <div class="suggestion-info">
+                    <h5 class="suggestion-name" style="margin-bottom:15px;">@{{ suggested_user.user.username }}</h5>
+                    <a href="{% url 'profile' suggested_user.user.username %}">
+                      <button class="btn btn-primary">
+                        View profile
+                      </button>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+        </div>
+    </div>
+    <script>
+      function toggleLike(postId) {
+        // Send a request to the server to toggle the like status
+        // of the post with the given id
+        fetch(`/like_post/${postId}`, { method: 'POST' })
+          .then(response => response.json())
+          .then(data => {
+            // Update the like button text and the number of likes
+            // based on the response from the server
+            const likeButton = document.querySelector(`#like-button-${postId}`);
+            likeButton.innerHTML = data.liked ? 'Unlike' : 'Like';
+            const likesCount = document.querySelector(`#likes-count-${postId}`);
+            likesCount.innerHTML = data.likes;
+          })
+          .catch(error => console.error(error));
+      }
+
+      const likeButton = document.querySelector('.like-button');
+      likeButton.addEventListener('click', toggleLike);
+
+      function toggleLike() {
+        likeButton.classList.toggle('liked');
+      }
+
+      document.querySelector('.ellipsis-container').addEventListener('click', function() {
+        this.querySelector('.ellipsis-options').classList.toggle('show');
+      });
+    </script>
+</body>
+</html>
